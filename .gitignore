@@ -16,3 +16,5 @@ test.py
 config.yaml
 mariadb_data/
 mitmproxy/
+*/dist/
+*/build/

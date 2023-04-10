@@ -28,13 +28,13 @@ class DealData:
         """
         __biz = tools.get_param(req_url, "__biz")
 
-        regex = 'id="nickname">(.*?)</strong>'
+        regex = 'class="profile_nickname">(.*?)</strong>'
         account = tools.get_info(data, regex, fetch_one=True).strip()
 
         regex = 'profile_avatar">.*?<img src="(.*?)"'
         head_url = tools.get_info(data, regex, fetch_one=True)
 
-        regex = 'class="profile_desc">(.*?)</p>'
+        regex = 'class="profile_meta">(.*?)</p>'
         summary = tools.get_info(data, regex, fetch_one=True).strip()
 
         # 认证信息（关注的账号直接点击查看历史消息，无认证信息）
@@ -320,7 +320,8 @@ class DealData:
                         )
 
             else:  # 该__biz 账号已被封
-                self._task_manager.sign_account_is_zombie(__biz)
+                # self._task_manager.sign_account_is_zombie(__biz)
+                log.info("存在bug无法访问，公众号 {} 抓取完毕".format(__biz))
                 pass
 
         except Exception as e:
@@ -344,10 +345,10 @@ class DealData:
         selector = Selector(text)
 
         content = selector.xpath(
-            '//div[@class="rich_media_content "]|//div[@class="rich_media_content"]|//div[@class="share_media"]'
+            '//div[@id="js_content"]|//div[@class="rich_media_content"]|//div[@class="share_media"]'
         )
         title = (
-            selector.xpath('//h2[@class="rich_media_title"]/text()')
+            selector.xpath('//h1[@id="activity-name"]/text()')
             .extract_first(default="")
             .strip()
         )
@@ -358,13 +359,13 @@ class DealData:
         )
         author = (
             selector.xpath(
-                '//span[@class="rich_media_meta rich_media_meta_text"]//text()'
+                '//span[@class="rich_media_meta rich_media_meta_text"]/text()'
             )
             .extract_first(default="")
             .strip()
         )
 
-        publish_timestamp = selector.re_first('n="(\d{10})"')
+        publish_timestamp = selector.re_first('create_time = "(\d{10})"')
         publish_timestamp = int(publish_timestamp) if publish_timestamp else None
         publish_time = (
             tools.timestamp_to_date(publish_timestamp) if publish_timestamp else None
