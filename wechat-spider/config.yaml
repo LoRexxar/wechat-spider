@@ -32,3 +32,8 @@ log:
 
 mitm:
   log_level: 0 # mitm框架日志的打印级别。值在0~3之间，值越大，输出的日志信息越详细，默认是1。详见：https://docs.mitmproxy.org/stable/concepts-options/
+
+wechat:
+  cookie: "appmsglist_action_3907326541=card; ua_id=O5T6ChVi5qDVnWxwAAAAAI1Jh4KdtKmvb__Bsub_PYw=; mm_lang=zh_CN; _clck=3907326541|1|f6a|0; rewardsn=; wxtokenkey=777; pgv_info=ssid=s3063972355; pgv_pvid=6305076999; eas_sid=xMA7JbFZVanizs8WwLMzSr9YQi; _qpsvr_localtk=0.004155613692446769; RK=3F9wtkmMU6; ptcz=26706f3c9065bf8a18542ea03452db5d08cd661cd9adb9eac58590e6f2b08ec4; lostarkqqcomrouteLine=a20230314index_a20230314index; wwapp.vid=; wwapp.cst=; wwapp.deviceid=; appmsg_token=1211_y3yZFh67JdIH2Ll3B14QEnXTLVPCpmbKjlHbEhW0gkh9hJjIX5t8atb0V7c8E3mvohLVbWGsyEkS2CwN; lang=zh_CN; wxuin=1089095992; devicetype=Windows10; version=62060834; pass_ticket=OYykAz8tz321UO5f6ZJhCZPHBRueNujtUEDwt9L3FWb/N84ieH4J6ngoqbAcH8t2LQNxJfRMtRW20uMeETfILw==; wap_sid2=CLiSqYcEEooBeV9ISENycGxKU0xKckdtTWNLdnVIRWZBSlczSGc0Z2owWDZtQkh3UGhzUlFFMFpIMDFKWjZoTEJzV0FxYTJtejdRV0ZVVUFsYUlZR2tWdktqQnlkMkNwNGtITEJvNGtQLTdYOFRacTNYWlkwMmFUc2c5OTJuUjNlMkpuOGthWXZIeUY1b1NBQUF+MLOL2qEGOAxAlE4=; uuid=ca2d95d3533bdd98d692398a09b03404; rand_info=CAESIEQxp2byMz4oTIXEODL+izQnaPPBE/CnGIv6JP7znxtM; slave_bizuin=3907326541; data_bizuin=3907326541; bizuin=3907326541; data_ticket=mVf5k7LxBB/iW6XQUFd5VBqmLW9TYc8GLAsKf7dGMJrc8V0FzH0k74fcLmtoPaT/; slave_sid=anE3MnY2ZnpKMnZuRzU0OGVrX3hOd1pQSVFCdkI0eEI2QklBTmd0YW1YUHpnc3pFVlAxSUhzZWpDbGwyNUJ2X1Z4ZU85Y29MQnhXU2d2NnNCeUhOR3RBMTZUYXhtMDdHeE9acjVLano5eG1qbFhVU0c5enlEQWNpNnhpTDB5N1NGZGFHMXpISE5OZGI3aTJX; slave_user=gh_8f2c3072b8fa; xid=cd68db73eb8548171025d98618200932"
+  token: "2038225367"
+  count: 5

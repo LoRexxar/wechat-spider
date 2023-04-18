@@ -11,6 +11,9 @@ import utils.tools as tools
 from utils.log import log
 from core import data_pipeline
 from core.task_manager import TaskManager
+from config import config
+import requests
+import time
 
 
 class DealData:
@@ -18,7 +21,7 @@ class DealData:
         self._task_manager = TaskManager()
         self._task_manager.reset_task()
 
-    def __parse_account_info(self, data, req_url):
+    def parse_account_info(self, data, req_url):
         """
         @summary:
         ---------
@@ -231,7 +234,7 @@ class DealData:
                 # 取html格式里的文章列表
                 if "action=home" in req_url:
                     # 解析公众号信息
-                    self.__parse_account_info(text, req_url)
+                    self.parse_account_info(text, req_url)
 
                     # 解析文章列表
                     regex = "msgList = '(.*?})';"
@@ -321,11 +324,118 @@ class DealData:
 
             else:  # 该__biz 账号已被封
                 # self._task_manager.sign_account_is_zombie(__biz)
-                log.info("存在bug无法访问，公众号 {} 抓取完毕".format(__biz))
+                log.info("账号被封了，g")
                 pass
 
         except Exception as e:
             log.exception(e)
+
+        return self._task_manager.get_task()
+
+    def deal_article_list_by_wechat(self):
+        # 目标url
+        url = "https://mp.weixin.qq.com/cgi-bin/appmsg"
+        s1 = "select * from `wechat_profile`"
+        results = self._task_manager._mysqldb.find(s1)
+        is_scan = 0
+        cookie = ""
+        token = ""
+        count = ""
+
+        for result in results:
+            if result[1] == "WECHAT_COOKIE":
+                cookie = result[2] 
+            elif result[1]  == "WECHAT_TOKEN":
+                token = result[2] 
+            elif result[1]  == "WECHAT_COUNT":
+                count = result[2] 
+            elif result[1] == "IS_SCAN":
+                is_scan = int(result[2])
+
+        if is_scan:
+            log.info("当前已经有线程正在扫描中")
+            return
+
+        s2 = "update `wechat_profile` SET `value`='1' where `profile_name`='IS_SCAN'"
+        self._task_manager._mysqldb.update(s2)
+
+        # 使用Cookie，跳过登陆操作
+        headers = {
+          "Cookie": cookie,
+          "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/62.0.3202.62 Safari/537.36",
+        }
+
+        # 获取所有的任务
+        sql = "SELECT * FROM `wechat_account_task` where is_zombie = 0 and last_publish_time < '{today}'".format(today=tools.get_current_date(date_format='%Y-%m-%d' + ' 00:00:00'))
+        tasks = self._task_manager._mysqldb.find(sql, to_json=True)
+
+        for task in tasks:
+            biz = task['__biz']
+
+            """
+            需要提交的data
+            以下个别字段是否一定需要还未验证。
+            注意修改yourtoken,number
+            number表示从第number页开始爬取，为5的倍数，从0开始。如0、5、10……
+            token可以使用Chrome自带的工具进行获取
+            fakeid是公众号独一无二的一个id，等同于后面的__biz
+            """
+
+            data = {
+                "token": token,
+                "lang": "zh_CN",
+                "f": "json",
+                "ajax": "1",
+                "action": "list_ex",
+                "begin": "0",
+                "count": count,
+                "query": "",
+                "fakeid": biz,
+                "type": "9",
+            }
+
+            # 使用get方法进行提交
+            log.info("对{}的公众号进行扫描".format(biz))
+            content_json = requests.get(url, headers=headers, params=data).json()
+
+            print(content_json)
+
+            # 检查登录状态
+            if "invalid session" in str(content_json):
+                log.info("当前登录状态失效")
+                sql = "update `wechat_profile` SET `value`='0' where `profile_name`='IS_LOGIN'"
+                self._task_manager._mysqldb.update(sql)
+
+                s4 = "update `wechat_profile` SET `value`='0' where `profile_name`='IS_SCAN'"
+                self._task_manager._mysqldb.update(s4)
+                return False
+            else:
+                sql = "update `wechat_profile` SET `value`='1' where `profile_name`='IS_LOGIN'"
+                self._task_manager._mysqldb.update(sql)
+
+            # 返回了一个json，里面是每一页的数据
+            # for item in content_json["app_msg_list"]:
+            #     # 提取每页文章的标题及对应的url
+            #     url = item["link"]
+
+            # 存文章任务
+            article_task = [
+                {
+                    "article_url": article["link"],
+                    "__biz": biz
+                }
+                for article in content_json["app_msg_list"]
+            ]
+
+            sql, article_task = tools.make_batch_sql('wechat_article_task', article_task)
+            self._task_manager._mysqldb.add_batch(sql, article_task)
+
+            log.info("每次请求公众号后台需要等待5分钟")
+            time.sleep(300)
+
+
+        s4 = "update `wechat_profile` SET `value`='0' where `profile_name`='IS_SCAN'"
+        self._task_manager._mysqldb.update(s4)
 
         return self._task_manager.get_task()
 

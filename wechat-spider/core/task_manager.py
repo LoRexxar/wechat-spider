@@ -13,6 +13,7 @@ import utils.tools as tools
 from utils.log import log
 import random
 from config import config
+from . import deal_data
 
 
 class TaskManager():
@@ -205,22 +206,23 @@ class TaskManager():
         sleep_time = random.randint(self._spider_interval_min, self._spider_interval_max)
 
         if not url:
-            account_task = self.get_account_task()
-            if account_task:
-                __biz = account_task.get('__biz')
-                last_publish_time = account_task.get('last_publish_time')
-                self.record_last_article_publish_time(__biz, last_publish_time)
-                tip = '正在抓取列表'
-                url = 'https://mp.weixin.qq.com/mp/profile_ext?action=home&__biz={}&scene=124#wechat_redirect'.format(__biz)
+            # 原方案放弃，
+            # account_task = self.get_account_task()
+            # if account_task:
+            #     __biz = account_task.get('__biz')
+            #     last_publish_time = account_task.get('last_publish_time')
+            #     self.record_last_article_publish_time(__biz, last_publish_time)
+            #     tip = '正在抓取列表'
+            #     url = 'https://mp.weixin.qq.com/mp/profile_ext?action=home&__biz={}&scene=124#wechat_redirect'.format(__biz)
+            # else:
+            article_task = self.get_article_task()
+            if article_task:
+                tip = '正在抓取详情'
+                url = article_task.get('article_url')
             else:
-                article_task = self.get_article_task()
-                if article_task:
-                    tip = '正在抓取详情'
-                    url = article_task.get('article_url')
-                else:
-                    sleep_time = config.get('spider').get('no_task_sleep_time')
-                    log.info('暂无任务 休眠 {}s'.format(sleep_time))
-                    tip = '暂无任务 '
+                sleep_time = config.get('spider').get('no_task_sleep_time')
+                log.info('暂无任务 休眠 {}s'.format(sleep_time))
+                tip = '暂无任务 '
 
         if url:
             next_page = "{tip} 休眠 {sleep_time}s 下次刷新时间 {begin_spider_time} <script>setTimeout(function(){{window.location.href='{url}';}},{sleep_time_msec});</script>".format(
@@ -249,5 +251,7 @@ class TaskManager():
 if __name__ == '__main__':
     task_manager = TaskManager()
 
-    result = task_manager.get_task()
-    print(result)
+    # result = task_manager.get_task()
+    # print(result)
+
+    deal_data.deal_article_list_by_wechat()

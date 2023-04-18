@@ -23,12 +23,22 @@ class WechatCapture():
         try:
             if 'mp/profile_ext?action=home' in url or 'mp/profile_ext?action=getmsg' in url:  # 文章列表 包括html格式和json格式
 
-                ctx.log.info('抽取文章列表数据')
-                next_page = deal_data.deal_article_list(url, flow.response.text)
+                ctx.log.info('此功能已经删除')
+                # next_page = deal_data.deal_article_list(url, flow.response.text)
 
-                flow.response.text = re.sub('<img.*?>', '', flow.response.text)
+                # flow.response.text = re.sub('<img.*?>', '', flow.response.text)
 
-            elif '/s?__biz=' in url or '/mp/appmsg/show?__biz=' in url or '/mp/rumor' in url:  # 文章内容；mp/appmsg/show?_biz 为2014年老版链接;  mp/rumor 是不详实的文章
+            elif 'startscan' in url: # 开始扫描
+                ctx.log.info('检查全部任务列表')
+                deal_data.deal_article_list_by_wechat()
+
+                ctx.log.info('开始扫描')
+                next_page = deal_data.get_task()
+
+            elif '/s?__biz=' in url or '/mp/appmsg/show?__biz=' in url or '/mp/rumor' in url:  
+                # 文章内容；mp/appmsg/show?_biz 为2014年老版链接;  mp/rumor 是不详实的文章
+                ctx.log.info('检查账户信息有效性')
+                deal_data.parse_account_info(flow.response.text, url)
 
                 ctx.log.info('抽取文章内容')
                 next_page = deal_data.deal_article(url, flow.response.text)
@@ -43,16 +53,6 @@ class WechatCapture():
 
                 # 去掉图片
                 flow.response.text = re.sub('<img.*?>', '', flow.response.text)
-
-            elif 'mp/getappmsgext' in url:  # 阅读量 观看量
-
-                ctx.log.info('抽取阅读量 观看量')
-                deal_data.deal_article_dynamic_info(flow.request.data.content.decode('utf-8'), flow.response.text)
-
-            elif '/mp/appmsg_comment' in url:  # 评论列表
-
-                ctx.log.info('抽取评论列表')
-                deal_data.deal_comment(url, flow.response.text)
 
         except Exception as e:
             # log.exception(e)

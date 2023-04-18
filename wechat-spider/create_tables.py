@@ -137,6 +137,14 @@ def create_table():
     ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC
     '''
 
+    wechat_profile_table = '''
+    CREATE TABLE IF NOT EXISTS `wechat_profile` ( 
+      `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+      `profile_name` VARCHAR(100) NULL DEFAULT NULL , 
+      `value` VARCHAR(1000) NULL DEFAULT NULL 
+    ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC
+    '''
+
     if config.get('mysqldb').get('auto_create_tables'):
         mysqldb = MysqlDB(**config.get('mysqldb'))
         # _create_database(mysqldb, config.get('mysqldb').get('db'))
@@ -147,3 +155,4 @@ def create_table():
         _create_table(mysqldb, wechat_article_table)
         _create_table(mysqldb, wechat_account_task_table)
         _create_table(mysqldb, wechat_account_table)
+        _create_table(mysqldb, wechat_profile_table)
