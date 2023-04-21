@@ -196,14 +196,14 @@ class TaskManager():
 
         self._mysqldb.update(sql)
 
-    def get_task(self, url=None, tip=''):
+    def get_task(self, url=None, tip='', cookie='', sleep_time=0):
         """
         获取任务
         :param url: 指定url时，返回该url包装后的任务。否则先取公众号任务，无则取文章任务。若均无任务，则休眠一段时间之后再取
         :return:
         """
 
-        sleep_time = random.randint(self._spider_interval_min, self._spider_interval_max)
+        sleep_time = random.randint(self._spider_interval_min, self._spider_interval_max) + sleep_time
 
         if not url:
             # 原方案放弃，
@@ -225,8 +225,12 @@ class TaskManager():
                 tip = '暂无任务 '
 
         if url:
-            next_page = "{tip} 休眠 {sleep_time}s 下次刷新时间 {begin_spider_time} <script>setTimeout(function(){{window.location.href='{url}';}},{sleep_time_msec});</script>".format(
-                tip=tip and tip + ' ', sleep_time=sleep_time, begin_spider_time=tools.timestamp_to_date(tools.get_current_timestamp() + sleep_time), url=url, sleep_time_msec=sleep_time * 1000
+            js_set_cookie = "var cookieStr='{cookie}';var cookieArr=cookieStr.split('; ');for(var i=0;i<cookieArr.length;i++){{var cookie=cookieArr[i];var arr=cookie.split('=');document.cookie=arr[0]+'='+arr[1];}}".format(cookie=cookie)
+            # print(js_set_cookie)
+
+            next_page = "{tip} 休眠 {sleep_time}s 下次刷新时间 {begin_spider_time} <script>{js_set_cookie};setTimeout(function(){{window.location.href='{url}';}},{sleep_time_msec});</script>".format(
+                tip=tip and tip + ' ', sleep_time=sleep_time, begin_spider_time=tools.timestamp_to_date(tools.get_current_timestamp() + sleep_time), 
+                js_set_cookie=js_set_cookie, url=url, sleep_time_msec=sleep_time * 1000
             )
         else:
             next_page = "{tip} 休眠 {sleep_time}s 下次刷新时间 {begin_spider_time} <script>setTimeout(function(){{window.location.reload();}},{sleep_time_msec});</script>".format(

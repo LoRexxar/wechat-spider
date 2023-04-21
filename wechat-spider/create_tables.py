@@ -138,12 +138,14 @@ def create_table():
     '''
 
     wechat_profile_table = '''
-    CREATE TABLE IF NOT EXISTS `wechat_profile` ( 
-      `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
-      `profile_name` VARCHAR(100) NULL DEFAULT NULL , 
-      `value` VARCHAR(1000) NULL DEFAULT NULL 
-    ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC
+    CREATE TABLE IF NOT EXISTS `wechat_profile` (
+      `id` int(11) NOT NULL AUTO_INCREMENT,
+      `profile_name` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+      `value` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+      PRIMARY KEY (`id`)
+    ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC;
     '''
+
 
     if config.get('mysqldb').get('auto_create_tables'):
         mysqldb = MysqlDB(**config.get('mysqldb'))

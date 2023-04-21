@@ -29,11 +29,14 @@ class WechatCapture():
                 # flow.response.text = re.sub('<img.*?>', '', flow.response.text)
 
             elif 'startscan' in url: # 开始扫描
-                ctx.log.info('检查全部任务列表')
-                deal_data.deal_article_list_by_wechat()
+                ctx.log.info('检查全部任务列表，跳转微信首页')
+                next_page = deal_data.deal_article_list_by_wechat()
 
-                ctx.log.info('开始扫描')
-                next_page = deal_data.get_task()
+
+            elif 'waittask' in url or 'cgi-bin/home' in url:
+                ctx.log.info('抽取公众号列表内容')
+                next_page = deal_data.deal_article_list_by_wechat_sec()
+
 
             elif '/s?__biz=' in url or '/mp/appmsg/show?__biz=' in url or '/mp/rumor' in url:  
                 # 文章内容；mp/appmsg/show?_biz 为2014年老版链接;  mp/rumor 是不详实的文章
@@ -53,6 +56,13 @@ class WechatCapture():
 
                 # 去掉图片
                 flow.response.text = re.sub('<img.*?>', '', flow.response.text)
+
+            elif 'cgi-bin/appmsg' in url:
+                if "invalid referrer" in flow.response.text:
+                    ctx.log.info('页面来源检查出错')
+                    next_page = deal_data.deal_article_list_by_wechat()
+
+                next_page = deal_data.deal_wechat_list(url, flow.response.text)
 
         except Exception as e:
             # log.exception(e)
